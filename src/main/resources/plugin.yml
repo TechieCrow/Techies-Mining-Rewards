@@ -1,0 +1,4 @@
+name: MiningRewards
+version: '${project.version}'
+main: com.techiecrow.miningrewards.MiningRewards
+api-version: '1.20'

@@ -1,28 +1,27 @@
-package com.techiecrow.miningrewards.listeners;
+package com.techiecrow.techiesminingrewards.listeners;
 
-import com.techiecrow.miningrewards.MiningRewards;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import com.techiecrow.techiesminingrewards.TechiesMiningRewards;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 
 public class BlockBreakListener implements Listener {
 
-    private final MiningRewards plugin;
+    private final TechiesMiningRewards plugin;
     private final List<String> ores;
-    private final Map<String, Integer> rewards;
+    private final List<String> rewards;
     private final Random random;
 
-    public BlockBreakListener(MiningRewards plugin) {
+    public BlockBreakListener(TechiesMiningRewards plugin) {
         this.plugin = plugin;
-        this.ores = plugin.getPluginConfig().getStringList("ores");
-        this.rewards = parseRewards(plugin.getPluginConfig().getMapList("rewards"));
+        this.ores = plugin.getConfig().getStringList("ores");
+        this.rewards = plugin.getConfig().getStringList("rewards");
         this.random = new Random();
     }
 
@@ -30,7 +29,7 @@ public class BlockBreakListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Material blockType = event.getBlock().getType();
         if (isOre(blockType)) {
-            double chance = plugin.getPluginConfig().getDouble("diamond_chance");
+            double chance = plugin.getConfig().getDouble("diamond_chance");
             Player player = event.getPlayer();
             if (player.getGameMode() != GameMode.CREATIVE && Math.random() < chance) {
                 dropRandomReward(event.getBlock().getLocation(), player);
@@ -45,36 +44,27 @@ public class BlockBreakListener implements Listener {
 
     private void dropRandomReward(Location location, Player player) {
         if (!rewards.isEmpty()) {
-            String reward = getRandomReward();
-            if (reward != null) {
-                String rewardMaterialName = reward.split(":")[0];
-                int quantity = Integer.parseInt(reward.split(":")[1]);
+            String rewardString = getRandomReward();
+            if (rewardString != null) {
+                String[] rewardParts = rewardString.split(":");
+                String rewardMaterialName = rewardParts[0];
+                int quantity = Integer.parseInt(rewardParts[1]);
                 Material rewardMaterial = Material.valueOf(rewardMaterialName);
-                location.getWorld().dropItemNaturally(location, new ItemStack(rewardMaterial, quantity));
+                World world = location.getWorld();
+                if (world != null) {
+                    world.dropItemNaturally(location, new ItemStack(rewardMaterial, quantity));
+                }
                 player.sendMessage("You received a reward: " + rewardMaterial.name() + " x" + quantity);
+                location.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, location, 10, 0.5, 0.5, 0.5);
             }
         }
     }
 
     private String getRandomReward() {
-        List<String> rewardList = new ArrayList<>(rewards.keySet());
-        if (!rewardList.isEmpty()) {
-            String reward = rewardList.get(random.nextInt(rewardList.size()));
-            int quantity = rewards.get(reward);
-            return reward + ":" + quantity;
+        if (!rewards.isEmpty()) {
+            int index = random.nextInt(rewards.size());
+            return rewards.get(index);
         }
         return null;
-    }
-
-    private Map<String, Integer> parseRewards(List<Map<?, ?>> rewardList) {
-        Map<String, Integer> rewards = new HashMap<>();
-        for (Map<?, ?> reward : rewardList) {
-            for (Map.Entry<?, ?> entry : reward.entrySet()) {
-                String rewardName = entry.getKey().toString();
-                int quantity = Integer.parseInt(entry.getValue().toString());
-                rewards.put(rewardName, quantity);
-            }
-        }
-        return rewards;
     }
 }

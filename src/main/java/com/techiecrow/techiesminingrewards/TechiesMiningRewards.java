@@ -1,30 +1,31 @@
-package com.techiecrow.miningrewards;
+package com.techiecrow.techiesminingrewards;
 
-import com.techiecrow.miningrewards.listeners.BlockBreakListener;
+import com.techiecrow.techiesminingrewards.listeners.BlockBreakListener;
 import org.bstats.bukkit.Metrics;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class MiningRewards extends JavaPlugin {
+import java.util.Objects;
 
-    private static MiningRewards instance;
-    private FileConfiguration config;
+public class TechiesMiningRewards extends JavaPlugin {
 
     @Override
     public void onEnable() {
         // bStats
         int pluginId = 18844;
-        Metrics metrics = new Metrics(this, pluginId);
+        new Metrics(this, pluginId);
 
-        instance = this;
-
-        loadConfig();
+        this.RegisterConfig();
         getLogger().info("MiningRewards plugin has been enabled.");
 
         // Register the event listener
         getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
+
+        Commands commands = new Commands(this);
+
+        Objects.requireNonNull(getCommand("tmr"))
+                .setExecutor(commands);
+        Objects.requireNonNull(getCommand("tmr"))
+                .setTabCompleter(commands);
     }
 
     @Override
@@ -32,28 +33,8 @@ public class MiningRewards extends JavaPlugin {
         getLogger().info("MiningRewards plugin has been disabled.");
     }
 
-    public static MiningRewards getInstance() {
-        return instance;
+    private void RegisterConfig() {
+        getConfig().options().copyDefaults(true);
+        saveConfig();
     }
-
-    public FileConfiguration getPluginConfig() {
-        return config;
-    }
-
-    private void loadConfig() {
-        config = getConfig();
-        config.options().copyDefaults(true);
-        saveDefaultConfig();
-    }
-
-//    @Override
-//    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-//        if (command.getName().equalsIgnoreCase("miningrewardsreload")) {
-//            reloadConfig();
-//            loadConfig();
-//            sender.sendMessage("MiningRewards configuration reloaded.");
-//            return true;
-//        }
-//        return false;
-//    }
 }

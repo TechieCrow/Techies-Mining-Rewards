@@ -1,4 +1,13 @@
-name: MiningRewards
-version: '${project.version}'
-main: com.techiecrow.miningrewards.MiningRewards
+name: TechiesMiningRewards
+version: '1.0'
+main: com.techiecrow.techiesminingrewards.TechiesMiningRewards
+description: Give players a random reward when mining.
+author: TechieCrow
 api-version: '1.20'
+commands:
+  tmr:
+    description: Techies Mining Rewards reload command
+    usage: /tmr reload
+permissions:
+  techiesminingrewards.reload:
+    default: op

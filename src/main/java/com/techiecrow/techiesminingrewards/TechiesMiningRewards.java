@@ -8,6 +8,16 @@ import java.util.Objects;
 
 public class TechiesMiningRewards extends JavaPlugin {
 
+    private BlockBreakListener blockBreakListener;
+
+    public BlockBreakListener getBlockBreakListener() {
+        return blockBreakListener;
+    }
+
+    public void setBlockBreakListener(BlockBreakListener listener) {
+        this.blockBreakListener = listener;
+    }
+
     @Override
     public void onEnable() {
         // bStats
@@ -17,8 +27,9 @@ public class TechiesMiningRewards extends JavaPlugin {
         this.RegisterConfig();
         getLogger().info("MiningRewards plugin has been enabled.");
 
-        // Register the event listener
-        getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
+        // Register listener
+        blockBreakListener = new BlockBreakListener(this);
+        getServer().getPluginManager().registerEvents(blockBreakListener, this);
 
         Commands commands = new Commands(this);
 
